@@ -16,6 +16,9 @@ The first version should be simpler than a full community or group-coaching prod
 
 We also do not want the primary interaction model to be slash commands. Slash commands can be revisited later for shortcuts or admin actions, but the core user experience should be natural conversation backed by AI.
 
+
+The launch assumption is that the bot will run on a VM we control and will be installed into a Discord server. Users should not need to install separate software; joining the server should be enough to reach the bot in the server context once the bot has the right server permissions. Private coaching may still require a direct-message flow or a dedicated server channel, depending on Discord privacy settings and the final UX.
+
 ## Decision
 
 Build FitnessBot as a **Discord-first natural chat bot** while keeping the application core independent from Discord-specific concepts.
@@ -124,8 +127,11 @@ Adapters may support only part of this contract. Unsupported capabilities should
 
 The Discord adapter should support:
 
-- direct messages for private coaching, reminders, and check-ins;
+- installation into a Discord server owned by the project;
 - normal message events as the main interaction path;
+- direct messages or a dedicated server channel for private-feeling coaching, reminders, and check-ins;
+- permission checks for reading and sending messages in the intended server channels;
+- message-content access for natural-language understanding where Discord requires it;
 - optional buttons or select menus only when they simplify a natural conversation;
 - Discord user identifiers mapped to internal user identities.
 
@@ -164,6 +170,19 @@ Do not place fitness logic, reminder policy, AI prompting strategy, or user prog
 - A channel abstraction adds some early complexity.
 - Some channel behavior will need capability checks instead of one-size-fits-all UI assumptions.
 - OpenRouter-specific behavior must be isolated so the app is not tightly coupled to one provider layer.
+
+
+## Deployment assumptions
+
+The first deployment target is a VM that we control. The runtime should be configured with environment variables or secret storage for:
+
+- the Discord bot token and application identifiers;
+- the OpenRouter API key;
+- model selection once a model is chosen;
+- database or persistence configuration;
+- reminder scheduling configuration.
+
+The bot process should be managed so it restarts after crashes or VM reboots. The exact process manager can be chosen later with the application stack.
 
 ## Implementation guidance
 
